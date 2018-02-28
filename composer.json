@@ -8,7 +8,7 @@
   ],
   "homepage": "https://github.com/qianxueqiang/yii2-qsau-wechat",
   "type": "yii2-extension",
-  "license": "Apache",
+  "license": "MIT",
   "support": {
     "source": "https://github.com/qianxueqiang/yii2-qsau-wechat"
   },
