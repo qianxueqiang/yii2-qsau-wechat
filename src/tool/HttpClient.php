@@ -1,6 +1,37 @@
 <?php
 namespace qwechat\tool;
 
+/**
+ * http客户端，用它可以发起http请求
+ *
+ * 示例：GET
+ * $http = new HttpClient();
+ * $http->get("http://www.baidu.com");
+ *
+ * 示例：POST
+ * $http = new HttpClient();
+ * $postdata = [];
+ * $http->post("http://www.baidu.com",$postdata);
+ * 或者
+ * $http = new HttpClient();
+ * $http->setPostBodyData($postdata);
+ * $http->post();
+ *
+ * 抓取http状态码：
+ * $http = new HttpClient();
+ * $http->get("http://www.baidu.com");
+ * $http->getResponseStateCode();
+ *
+ * 抓取http返回信息：
+ * $http = new HttpClient();
+ * $http->get("http://www.baidu.com");
+ * $http->getResponseInfo();
+ *
+ *
+ * @date 2018年3月8日
+ *
+ * @author xueqiang.qian<xueqiang.qian@qq.com>
+ */
 class HttpClient
 {
 
@@ -26,6 +57,30 @@ class HttpClient
     private $curl;
 
     /**
+     * 请求响应的数据
+     *
+     * @var unknown
+     */
+    private $response_data;
+
+    /**
+     * 请求响应的信息
+     *
+     * @var unknown
+     */
+    private $response_info;
+
+    /**
+     * 异常信息
+     *
+     * @var array
+     */
+    private $errors = [
+        'error' => '',
+        'errno' => 0
+    ];
+
+    /**
      * 初始化函数
      */
     public function __construct()
@@ -47,32 +102,6 @@ class HttpClient
     }
 
     /**
-     * 获取异常信息
-     *
-     * @return string
-     */
-    public function getError()
-    {
-        if ($this->curl)
-            curl_error($this->curl);
-        else
-            return 'curl is null!';
-    }
-
-    /**
-     * 获取异常码
-     *
-     * @return string
-     */
-    public function getErron()
-    {
-        if ($this->curl)
-            curl_errno($this->curl);
-        else
-            return 'curl is null!';
-    }
-
-    /**
      * 设置超时时间
      *
      * @param unknown $timeout            
@@ -81,6 +110,21 @@ class HttpClient
     public function setTimeout($timeout)
     {
         curl_setopt($this->curl, CURLOPT_TIMEOUT, $timeout);
+        return $this;
+    }
+
+    /**
+     * 设置CA证书
+     *
+     * @param unknown $cert_url            
+     * @param unknown $key_url            
+     * @return \qwechat\tool\HttpClient
+     */
+    public function setCA($cert_url, $key_url)
+    {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSLCERT, $cert_url);
+        curl_setopt($ch, CURLOPT_SSLKEY, $key_url);
         return $this;
     }
 
@@ -115,7 +159,7 @@ class HttpClient
      */
     public function setPostBodyData($data)
     {
-//         var_dump($data);
+        // var_dump($data);
         curl_setopt($this->curl, CURLOPT_POST, true);
         curl_setopt($this->curl, CURLOPT_POSTFIELDS, $data);
         return $this;
@@ -180,16 +224,6 @@ class HttpClient
     }
 
     /**
-     * 执行并返回执行结果
-     *
-     * @return mixed
-     */
-    private function exec()
-    {
-        return curl_exec($this->curl);
-    }
-
-    /**
      * get请求
      *
      * @param unknown $url            
@@ -201,18 +235,93 @@ class HttpClient
     }
 
     /**
-     * post请求
+     * 执行post请求
      *
      * @param unknown $url            
+     * @param array $postdata            
+     * @return mixed|\qwechat\tool\unknown
      */
-    public function post($url, $data = [])
+    public function post($url, $postdata = [])
     {
         $this->setUrl($url);
-        if (! empty($data)) {
-            $this->setPostBodyData($data);
+        if (! empty($postdata)) {
+            $this->setPostBodyData($postdata);
         }
-//         var_dump($url);
         return $this->exec();
+    }
+
+    /**
+     * 执行并返回执行结果
+     *
+     * @return mixed
+     */
+    private function exec()
+    {
+        $this->response_data = curl_exec($this->curl);
+        $this->errors['errno'] = curl_errno($this->curl);
+        $this->errors['error'] = curl_error($this->curl);
+        $this->response_info = curl_getinfo($this->curl);
+        return $this->response_data;
+    }
+
+    /**
+     * 获取返回的数据
+     *
+     * @return string
+     */
+    public function getResponseData()
+    {
+        return $this->response_data;
+    }
+
+    /**
+     * 获取异常信息
+     *
+     * @return []
+     */
+    public function getResponseErrors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * 获取异常信息
+     *
+     * @return string
+     */
+    public function getResponseError()
+    {
+        return $this->errors['error'];
+    }
+
+    /**
+     * 获取异常码
+     *
+     * @return string
+     */
+    public function getResponseErron()
+    {
+        return $this->errors['errno'];
+    }
+
+    /**
+     * 获取响应信息
+     *
+     * @return \qwechat\tool\unknown
+     */
+    public function getResponseInfo()
+    {
+        return $this->response_info;
+    }
+
+    /**
+     * 获取响应的状态码
+     *
+     * @return resource
+     */
+    public function getResponseStateCode()
+    {
+        return isset($this->response_info['http_code']) ? $this->response_info['http_code'] : 0;
     }
 
     /**

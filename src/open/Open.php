@@ -2,12 +2,15 @@
 namespace qwechat\open;
 
 use qwechat\tool\HttpClient;
-use qwechat\consts\WxApiUrl;
+use qwechat\consts\OpenConsts;
 use qwechat\crypto\WXBizMsgCrypt;
 use qwechat\crypto\Prpcrypt;
 
 /**
  * 第三方开放平台类
+ *
+ * 参考文档：https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1453779503&token=&lang=zh_CN
+ *
  * 操作步骤：
  * 1、接受微信推送的component_verify_ticket，接受微信推送后，需要将xml中的Encrypt通过
  * qwechat\crypto\Prpcrypt::decrypt进行解密，得到ticket
@@ -169,7 +172,7 @@ class Open
      */
     public function getAccessToken($ticket)
     {
-        $url = WxApiUrl::API_OPEN_ACCESS_TOKEN;
+        $url = OpenConsts::API_OPEN_ACCESS_TOKEN;
         $postdata = [
             'component_appid' => $this->appid,
             'component_appsecret' => $this->secret,
@@ -192,7 +195,7 @@ class Open
         if (! empty($appid)) {
             $this->appid = $appid;
         }
-        $url = WxApiUrl::API_OPEN_AUTH_CODE . "?component_access_token=" . $access_token;
+        $url = OpenConsts::API_OPEN_AUTH_CODE . "?component_access_token=" . $access_token;
         $postdata = [
             'component_appid' => $this->appid
         ];
@@ -218,7 +221,7 @@ class Open
     public function getAuthUrl($pre_auth_code, $redirect_uri, $auth_type = 3, $appid = "")
     {
         $appid = empty($appid) ? $this->appid : $appid;
-        $url = WxApiUrl::API_OPEN_AUTH_URL . "?component_appid=" . $appid . "&pre_auth_code=" . $pre_auth_code . "&redirect_uri=" . $redirect_uri . "&auth_type=" . $auth_type;
+        $url = OpenConsts::API_OPEN_AUTH_URL . "?component_appid=" . $appid . "&pre_auth_code=" . $pre_auth_code . "&redirect_uri=" . $redirect_uri . "&auth_type=" . $auth_type;
         return $url;
     }
 
@@ -242,7 +245,7 @@ class Open
     public function getAuthInfo($access_token, $auth_code, $appid = "")
     {
         $appid = empty($appid) ? $this->appid : $appid;
-        $url = WxApiUrl::API_OPEN_QUERY_AUTH . "?component_access_token=" . $access_token;
+        $url = OpenConsts::API_OPEN_QUERY_AUTH . "?component_access_token=" . $access_token;
         $postdata = [
             'component_appid' => $appid,
             'authorization_code' => $auth_code
@@ -268,7 +271,7 @@ class Open
     public function refreshAuthAccessToken($access_token, $authorizer_appid, $authorizer_refresh_token, $appid = "")
     {
         $appid = empty($appid) ? $this->appid : $appid;
-        $url = WxApiUrl::API_OPEN_REFRESH_ACCESS_TOKEN . "?component_access_token=" . $access_token;
+        $url = OpenConsts::API_OPEN_REFRESH_ACCESS_TOKEN . "?component_access_token=" . $access_token;
         $postdata = [
             'component_appid' => $appid,
             'authorizer_appid' => $authorizer_appid,
@@ -293,10 +296,65 @@ class Open
     public function getAuthAccountInfo($access_token, $auth_appid, $appid = "")
     {
         $appid = empty($appid) ? $this->appid : $appid;
-        $url = WxApiUrl::API_OPEN_AUTH_ACCOUNT_INFO . "?component_access_token=" . $access_token;
+        $url = OpenConsts::API_OPEN_AUTH_ACCOUNT_INFO . "?component_access_token=" . $access_token;
         $postdata = [
             'component_appid' => $appid,
             'authorizer_appid' => $auth_appid
+        ];
+        $http = new HttpClient();
+        $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
+        return $data;
+    }
+
+    /**
+     * 获取授权方的选项设置信息
+     *
+     * 该API用于获取授权方的公众号或小程序的选项设置信息，如：地理位置上报，语音识别开关，多客服开关。注意，获取各项选项设置信息，需要有授权方的授权，详见权限集说明。
+     *
+     * @param unknown $access_token
+     *            第三方开放平台的access_token
+     * @param unknown $auth_appid
+     *            授权公众平台的appid
+     * @param unknown $open_name
+     *            要查询选型的名称
+     * @return mixed
+     */
+    public function getAuthOption($access_token, $auth_appid, $open_name)
+    {
+        $url = OpenConsts::API_OPEN_AUTH_OPTION . "?component_access_token=" . $access_token;
+        $postdata = [
+            'component_appid' => $appid,
+            'authorizer_appid' => $auth_appid,
+            'option_name' => $open_name
+        ];
+        $http = new HttpClient();
+        $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
+        return $data;
+    }
+
+    /**
+     * 设置授权方的选项信息
+     *
+     * 该API用于设置授权方的公众号或小程序的选项信息，如：地理位置上报，语音识别开关，多客服开关。注意，设置各项选项设置信息，需要有授权方的授权，详见权限集说明。
+     *
+     * @param unknown $access_token
+     *            第三方开放平台的access_token
+     * @param unknown $auth_appid
+     *            授权公众平台的appid
+     * @param unknown $open_name
+     *            要查询选型的名称
+     * @param unknown $open_value
+     *            设置的选项值
+     * @return mixed
+     */
+    public function setAuthOption($access_token, $auth_appid, $open_name, $open_value)
+    {
+        $url = OpenConsts::API_OPEN_SET_AUTH_OPTION . "?component_access_token=" . $access_token;
+        $postdata = [
+            'component_appid' => $appid,
+            'authorizer_appid' => $auth_appid,
+            'option_name' => $open_name,
+            'option_value' => $open_value
         ];
         $http = new HttpClient();
         $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
