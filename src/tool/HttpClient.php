@@ -81,6 +81,20 @@ class HttpClient
     ];
 
     /**
+     * 请求数据
+     *
+     * @var array
+     */
+    private $request_data = [];
+
+    /**
+     * 请求地址
+     *
+     * @var string
+     */
+    private $request_url = '';
+
+    /**
      * 初始化函数
      */
     public function __construct()
@@ -159,7 +173,7 @@ class HttpClient
      */
     public function setPostBodyData($data)
     {
-        // var_dump($data);
+        $this->request_data = $data;
         curl_setopt($this->curl, CURLOPT_POST, true);
         curl_setopt($this->curl, CURLOPT_POSTFIELDS, $data);
         return $this;
@@ -195,6 +209,7 @@ class HttpClient
      */
     public function setPostBodyRaw($data = '')
     {
+
         return $this->setPostBodyData($data);
     }
 
@@ -206,6 +221,7 @@ class HttpClient
      */
     public function setUrl($url)
     {
+        $this->request_url = $url;
         curl_setopt($this->curl, CURLOPT_URL, $url);
         return $this;
     }
@@ -219,7 +235,7 @@ class HttpClient
      */
     public function setLocation()
     {
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
         return $this;
     }
 
@@ -262,6 +278,26 @@ class HttpClient
         $this->errors['error'] = curl_error($this->curl);
         $this->response_info = curl_getinfo($this->curl);
         return $this->response_data;
+    }
+
+    /**
+     * 获取请求数据
+     *
+     * @return array
+     */
+    public function getReqeustData()
+    {
+        return $this->request_data;
+    }
+
+    /**
+     * 获取请求的url
+     * 
+     * @return string
+     */
+    public function getRequestUrl()
+    {
+        return $this->request_url;
     }
 
     /**

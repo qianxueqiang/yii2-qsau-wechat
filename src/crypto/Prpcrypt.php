@@ -16,7 +16,14 @@ class Prpcrypt
      *
      * @var unknown
      */
-    public $key;
+    private $key;
+
+    /**
+     * 第三方开放平台的appid
+     *
+     * @var unknown
+     */
+    private $appid;
 
     /**
      * 初始化函数
@@ -24,9 +31,30 @@ class Prpcrypt
      * @param string $key
      *            解密的key对象，对应：公众号消息加解密Key
      */
-    public function __construct($key)
+    public function __construct($key, $appid)
     {
-        $this->key = base64_decode($key. "=");
+        $this->key = base64_decode($key . "=");
+        $this->appid = $appid;
+    }
+
+    /**
+     * 获取当前设置的appid
+     *
+     * @return string
+     */
+    public function getAppid()
+    {
+        return $this->appid;
+    }
+
+    /**
+     * 获取被设置的key
+     *
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->key;
     }
 
     /**
@@ -36,9 +64,10 @@ class Prpcrypt
      *            需要加密的明文
      * @return string 加密后的密文
      */
-    public function encrypt($text, $appid)
+    public function encrypt($text, $appid = "")
     {
         try {
+            $appid = empty($appid) ? $this->getAppid() : $appid;
             // 获得16位随机字符串，填充到明文之前
             $random = $this->getRandomStr();
             $text = $random . pack("N", strlen($text)) . $text . $appid;
@@ -77,12 +106,13 @@ class Prpcrypt
      * @param string $encrypted
      *            需要解密的密文
      * @param string $appid
-     *            应用的appid
+     *            应用的appid，如果是第三方开放平台，则是第三方开放平台的appid
      * @return string 解密得到的明文
      */
-    public function decrypt($encrypted, $appid)
+    public function decrypt($encrypted, $appid = "")
     {
         try {
+            $appid = empty($appid) ? $this->getAppid() : $appid;
             // 使用BASE64对需要解密的字符串进行解码
             $ciphertext_dec = base64_decode($encrypted);
             $module = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');

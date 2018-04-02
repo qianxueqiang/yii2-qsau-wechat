@@ -73,4 +73,11 @@ class OpenConsts
      * @var string
      */
     const API_OPEN_SET_AUTH_OPTION = 'https://api.weixin.qq.com/cgi-bin/component/api_set_authorizer_option';
+
+    /**
+     * 小程序微信login
+     *
+     * @var string
+     */
+    const API_OPEN_SMALL_USER_LOGIN = 'https://api.weixin.qq.com/sns/component/jscode2session';
 }

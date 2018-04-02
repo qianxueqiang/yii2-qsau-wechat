@@ -50,35 +50,35 @@ class Open
     /**
      * 第三方公众平台的appid
      *
-     * @var unknown
+     * @var string
      */
     private $appid;
 
     /**
      * 第三方平台的key（encodingAesKey）
      *
-     * @var unknown
+     * @var string
      */
     private $aeskey;
 
     /**
      * 开放平台的token
      *
-     * @var unknown
+     * @var string
      */
     private $token;
 
     /**
      * 开放平台的secret
      *
-     * @var unknown
+     * @var string
      */
     private $secret;
 
     /**
      * 初始化函数
      *
-     * @param unknown $conf            
+     * @param string $conf            
      */
     public function __construct($conf)
     {
@@ -91,7 +91,7 @@ class Open
     /**
      * 获取当前应用的appid
      *
-     * @return \qwechat\open\unknown
+     * @return string
      */
     public function getAppid()
     {
@@ -101,7 +101,7 @@ class Open
     /**
      * 设置appid
      *
-     * @param unknown $appid            
+     * @param string $appid            
      */
     public function setAppid($appid)
     {
@@ -111,7 +111,7 @@ class Open
     /**
      * 获取secret
      *
-     * @return \qwechat\open\unknown
+     * @return string
      */
     public function getSecret()
     {
@@ -119,9 +119,19 @@ class Open
     }
 
     /**
+     * 获取解密私钥
+     *
+     * @return string
+     */
+    public function getAesKey()
+    {
+        return $this->aeskey;
+    }
+
+    /**
      * 设置secret
      *
-     * @param unknown $secret            
+     * @param string $secret            
      */
     public function setSecret($secret)
     {
@@ -152,12 +162,15 @@ class Open
      *            
      * @return \qwechat\crypto\Prpcrypt
      */
-    public function getPrpcrypt($aeskey = "")
+    public function getPrpcrypt($aeskey = "", $appid = "")
     {
         if (empty($aeskey)) {
-            $aeskey = $this->aeskey;
+            $aeskey = $this->getAesKey();
         }
-        return new Prpcrypt($aeskey);
+        if (empty($appid)) {
+            $appid = $this->getAppid();
+        }
+        return new Prpcrypt($aeskey, $appid);
     }
 
     /**
@@ -186,7 +199,7 @@ class Open
     /**
      * 获取authcode
      *
-     * @param unknown $access_token            
+     * @param string $access_token            
      * @param string $appid            
      * @return mixed
      */
@@ -207,11 +220,11 @@ class Open
     /**
      * 获取用户授权页的URL地址
      *
-     * @param unknown $appid
+     * @param string $appid
      *            component_appid第三方平台方appid
-     * @param unknown $pre_auth_code
+     * @param string $pre_auth_code
      *            第三方平台方appid预授权码
-     * @param unknown $redirect_uri
+     * @param string $redirect_uri
      *            redirect_uri回调URI，此URL必须和开放平台填写的“登录授权的发起页域名”保持一致
      * @param number $auth_type
      *            要授权的帐号类型， 1则商户扫码后，手机端仅展示公众号、2表示仅展示小程序，3表示公众号和小程序都展示。
@@ -234,11 +247,11 @@ class Open
      * authorizer_refresh_token 接口调用凭据刷新令牌（在授权的公众号具备API权限时，才有此返回值），刷新令牌主要用于第三方平台获取和刷新已授权用户的access_token，只会在授权时刻提供，请妥善保存。 一旦丢失，只能让用户重新授权，才能再次拿到新的刷新令牌
      * func_info 授权给开发者的权限集列表，ID为1到26分别代表： 1、消息管理权限 2、用户管理权限 3、帐号服务权限 4、网页服务权限 5、微信小店权限 6、微信多客服权限 7、群发与通知权限 8、微信卡券权限 9、微信扫一扫权限 10、微信连WIFI权限 11、素材管理权限 12、微信摇周边权限 13、微信门店权限 14、微信支付权限 15、自定义菜单权限 16、获取认证状态及信息 17、帐号管理权限（小程序） 18、开发管理与数据分析权限（小程序） 19、客服消息管理权限（小程序） 20、微信登录权限（小程序） 21、数据分析权限（小程序） 22、城市服务接口权限 23、广告管理权限 24、开放平台帐号管理权限 25、 开放平台帐号管理权限（小程序） 26、微信电子发票权限 请注意： 1）该字段的返回不会考虑公众号是否具备该权限集的权限（因为可能部分具备），请根据公众号的帐号类型和认证情况，来判断公众号的接口权限。
      *
-     * @param unknown $access_token
+     * @param string $access_token
      *            第三方开放平台的操作码
-     * @param unknown $auth_code
+     * @param string $auth_code
      *            公众号授权的auth_codes
-     * @param unknown $appid
+     * @param string $appid
      *            第三方开放平台appid
      * @return mixed
      */
@@ -258,11 +271,11 @@ class Open
     /**
      * 刷新公众号|小程序的授权的access_token
      *
-     * @param unknown $access_token
+     * @param string $access_token
      *            第三方的access_token
-     * @param unknown $authorizer_appid
+     * @param string $authorizer_appid
      *            授权的appid
-     * @param unknown $authorizer_refresh_token
+     * @param string $authorizer_refresh_token
      *            授权的refresh_token
      * @param string $appid
      *            第三方appid
@@ -285,9 +298,9 @@ class Open
     /**
      * 获取授权的公众号或小程序的账户信息
      *
-     * @param unknown $access_token
+     * @param string $access_token
      *            开放平台的access_token
-     * @param unknown $auth_appid
+     * @param string $auth_appid
      *            授权的appid
      * @param string $appid
      *            可选，开放平台的appid
@@ -311,11 +324,11 @@ class Open
      *
      * 该API用于获取授权方的公众号或小程序的选项设置信息，如：地理位置上报，语音识别开关，多客服开关。注意，获取各项选项设置信息，需要有授权方的授权，详见权限集说明。
      *
-     * @param unknown $access_token
+     * @param string $access_token
      *            第三方开放平台的access_token
-     * @param unknown $auth_appid
+     * @param string $auth_appid
      *            授权公众平台的appid
-     * @param unknown $open_name
+     * @param string $open_name
      *            要查询选型的名称
      * @return mixed
      */
@@ -337,13 +350,13 @@ class Open
      *
      * 该API用于设置授权方的公众号或小程序的选项信息，如：地理位置上报，语音识别开关，多客服开关。注意，设置各项选项设置信息，需要有授权方的授权，详见权限集说明。
      *
-     * @param unknown $access_token
+     * @param string $access_token
      *            第三方开放平台的access_token
-     * @param unknown $auth_appid
+     * @param string $auth_appid
      *            授权公众平台的appid
-     * @param unknown $open_name
+     * @param string $open_name
      *            要查询选型的名称
-     * @param unknown $open_value
+     * @param string $open_value
      *            设置的选项值
      * @return mixed
      */
@@ -358,6 +371,23 @@ class Open
         ];
         $http = new HttpClient();
         $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
+        return $data;
+    }
+
+    /**
+     * 开放平台小程序login操作
+     *
+     * @param string $appid            
+     * @param string $js_code            
+     * @param string $grant_type            
+     * @return string
+     */
+    public function smallLogin($appid, $js_code, $grant_type = 'authorization_code')
+    {
+        $component_appid = $this->getAppid();
+        $url = OpenConsts::API_OPEN_SMALL_USER_LOGIN . "?appid=" . $appid . "&js_code=" . $js_code . "&grant_type=" . $grant_type . "&component_appid=" . $component_appid . "&component_access_token=" . $access_token;
+        $http = new HttpClient();
+        $data = $http->get($url);
         return $data;
     }
 }

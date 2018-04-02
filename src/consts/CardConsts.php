@@ -37,7 +37,7 @@ class CardConsts
      *
      * @var string
      */
-    const API_CARD_GET = 'https://api.weixin.qq.com/card/code/get';
+    const API_CARD_GET = 'https://api.weixin.qq.com/card/get';
 
     /**
      * 获取卡券在该公众号上的领取列表
@@ -96,6 +96,11 @@ class CardConsts
     const API_CARD_PUSH_CODE = 'http://api.weixin.qq.com/card/code/deposit';
 
     /**
+     * 查询导入code数目
+     */
+    const API_CARD_GETE_DEPOSIT_COUNT = 'http://api.weixin.qq.com/card/code/getdepositcount';
+
+    /**
      * 查询导入code数目接口
      *
      * @var string
@@ -108,4 +113,16 @@ class CardConsts
      * @var string
      */
     const API_CARD_CHECK_CODE = 'http://api.weixin.qq.com/card/code/checkcode';
+
+    /**
+     * 获取卡券列表
+     * 
+     * @var string
+     */
+    const API_CARD_LIST = 'https://api.weixin.qq.com/card/batchget';
+
+    /**
+     * 图片上传地址
+     */
+    const API_CARD_IMG_UPLOAD = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg';
 }

@@ -2,6 +2,7 @@
 namespace qwechat\card;
 
 use qwechat\consts\CardConsts;
+use qwechat\tool\HttpClient;
 
 /**
  * 微信卡券功能
@@ -18,7 +19,7 @@ class Card
     /**
      * 授权操作的access_token
      *
-     * @var unknown
+     * @var string
      */
     private $access_token;
 
@@ -32,7 +33,7 @@ class Card
     /**
      * 初始化函数
      *
-     * @param unknown $access_token            
+     * @param string $access_token            
      */
     public function __construct($access_token)
     {
@@ -42,33 +43,22 @@ class Card
     /**
      * 创建卡券
      *
-     * @param unknown $cardType            
-     * @param unknown $baseInfo            
-     * @param unknown $especial            
-     * @return boolean
+     * @param string $cardinfo
+     *            创建卡券的信息，json串
+     * @return string
      */
-    public function create($base_info, $advanced_info = '', $card_type = "GROUPON")
+    public function create($cardinfo)
     {
         $url = CardConsts::API_CARD_CREATE . "?access_token=" . $this->access_token;
-        $postdata = [
-            'card' => [
-                'card_type' => $card_type,
-                'groupon' => [
-                    'base_info' => $base_info,
-                    'advanced_info' => $advanced_info,
-                    'default_detail' => $default_detail
-                ]
-            ]
-        ];
         $http = new HttpClient();
-        $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
+        $data = $http->setPostBodyRaw($cardinfo)->post($url);
         return $data;
     }
 
     /**
      * 创建代金券
      *
-     * @param unknown $base_info
+     * @param string $base_info
      *            优惠券信息
      * @param string $least_cost
      *            满多少
@@ -76,7 +66,7 @@ class Card
      *            减多少
      * @param string $advanced_info
      *            高级属性
-     * @return unknown
+     * @return string
      */
     public function createCash($base_info, $least_cost = '1000', $reduce_cost = '100', $advanced_info = '')
     {
@@ -100,13 +90,13 @@ class Card
     /**
      * 创建折扣券
      *
-     * @param unknown $base_info
+     * @param string $base_info
      *            优惠券基本信息
      * @param number $discount
      *            优惠百分比
      * @param string $advanced_info
      *            优惠券高级属性
-     * @return unknown
+     * @return string
      */
     public function createDiscount($base_info, $discount = 30, $advanced_info = '')
     {
@@ -129,13 +119,13 @@ class Card
     /**
      * 创建兑换券
      *
-     * @param unknown $base_info
+     * @param string $base_info
      *            优惠券基本信息
      * @param string $gift
      *            兑换券信息
      * @param string $advanced_info
      *            优惠券高级选项
-     * @return unknown
+     * @return string
      */
     public function createGift($base_info, $gift = '', $advanced_info = '')
     {
@@ -158,7 +148,7 @@ class Card
     /**
      * 创建普通优惠券
      *
-     * @param unknown $base_info
+     * @param string $base_info
      *            优惠券基本信息
      * @param string $default_detail
      *            优惠券专用，填写优惠详情。
@@ -187,7 +177,7 @@ class Card
     /**
      * 删除卡券
      *
-     * @param unknown $card_id            
+     * @param string $card_id            
      * @return string
      */
     public function delete($card_id)
@@ -205,13 +195,13 @@ class Card
      * 更改卡券信息：
      * 支持更新所有卡券类型的部分通用字段及特殊卡券（会员卡、飞机票、电影票、会议门票）中特定字段的信息。
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            要修改的卡券id
-     * @param unknown $base_info
+     * @param string $base_info
      *            要修改卡券的基础信息
      * @param array $custom_attr
      *            要修改卡券的自定义信息，如：bonus_cleared（积分清零规则，会员卡专用。）
-     * @return unknown
+     * @return string
      */
     public function update($card_id, $base_info, $custom_attr = [])
     {
@@ -235,13 +225,13 @@ class Card
     /**
      * 卡券修改库存
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            卡券ID
-     * @param unknown $increase_stock_value
+     * @param string $increase_stock_value
      *            增加多少库存，支持不填或填0。
-     * @param unknown $reduce_stock_value
+     * @param string $reduce_stock_value
      *            减少多少库存，可以不填或填0。
-     * @return unknown
+     * @return string
      */
     public function updateStock($card_id, $increase_stock_value = 0, $reduce_stock_value = 0)
     {
@@ -259,13 +249,13 @@ class Card
     /**
      * 更改Code接口
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            卡券ID。自定义Code码卡券为必填
-     * @param unknown $old_code
+     * @param string $old_code
      *            需变更的Code码
-     * @param unknown $new_code
+     * @param string $new_code
      *            变更后的有效Code码
-     * @return unknown
+     * @return string
      */
     public function updateCode($card_id, $old_code, $new_code)
     {
@@ -283,11 +273,11 @@ class Card
     /**
      * 设置自定义卡券失效
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            卡券id
-     * @param unknown $code
+     * @param string $code
      *            卡券code
-     * @return unknown
+     * @return string
      */
     public function updateCustomUnavailable($card_id, $code)
     {
@@ -304,11 +294,11 @@ class Card
     /**
      * 设置非自定义卡券失效
      *
-     * @param unknown $code
+     * @param string $code
      *            卡券code
-     * @param unknown $reason
+     * @param string $reason
      *            卡券失效原因
-     * @return unknown
+     * @return string
      */
     public function updateUncustomUnavailable($code, $reason)
     {
@@ -325,13 +315,13 @@ class Card
     /**
      * 查询Code接口，校验卡券code是否合法
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            卡券ID代表一类卡券。
-     * @param unknown $code
+     * @param string $code
      *            卡券code，自定义code卡券必填
      * @param string $check_consume
      *            是否校验code核销状态，填入true和false时的code异常状态返回数据不同。
-     * @return unknown
+     * @return string
      */
     public function get($card_id, $code = false, $check_consume = true)
     {
@@ -351,14 +341,14 @@ class Card
     /**
      * 获取用户已领取卡券接口
      *
-     * @param unknown $openid
+     * @param string $openid
      *            需要查询的用户openid
      * @param string $card_id
      *            卡券ID。不填写时默认查询当前appid下的卡券。
      *            
-     * @return unknown
+     * @return string
      */
-    public function getCardList($openid, $card_id = '')
+    public function getUserCardList($openid, $card_id = '')
     {
         $url = CardConsts::API_CARD_GETCARDLIST . "?access_token=" . $this->access_token;
         $postdata = [
@@ -375,9 +365,9 @@ class Card
     /**
      * 查看卡券详情
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            卡券ID
-     * @return unknown
+     * @return string
      */
     public function getCardInfo($card_id)
     {
@@ -400,11 +390,11 @@ class Card
      * @param array $status_list
      *            支持开发者拉出指定状态的卡券列表 “CARD_STATUS_NOT_VERIFY”, 待审核 ； “CARD_STATUS_VERIFY_FAIL”, 审核失败； “CARD_STATUS_VERIFY_OK”， 通过审核； “CARD_STATUS_DELETE”， 卡券被商户删除； “CARD_STATUS_DISPATCH”， 在公众平台投放过的卡券a
      *            示例：["CARD_STATUS_VERIFY_OK", "CARD_STATUS_DISPATCH"]
-     * @return unknown
+     * @return string
      */
     public function getCardList($offset = 0, $count = 10, $status_list = [])
     {
-        $url = CardConsts::API_CARD_GET . "?access_token=" . $this->access_token;
+        $url = CardConsts::API_CARD_LIST . "?access_token=" . $this->access_token;
         $postdata = [
             'offset' => $offset,
             'count' => $count
@@ -421,13 +411,13 @@ class Card
      * 拉取卡券概况数据
      * 说明：支持调用该接口拉取本商户的总体数据情况，包括时间区间内的各指标总量。
      *
-     * @param unknown $begin_date
+     * @param string $begin_date
      *            查询数据的起始时间
-     * @param unknown $end_date
+     * @param string $end_date
      *            查询数据的截至时间
      * @param number $cond_source
      *            卡券来源，0为公众平台创建的卡券数据 、1是API创建的卡券数据
-     * @return unknown
+     * @return string
      */
     public function getBizuininfo($begin_date, $end_date, $cond_source = 0)
     {
@@ -445,11 +435,11 @@ class Card
     /**
      * 核销卡券
      *
-     * @param unknown $code
+     * @param string $code
      *            需核销的Code码
      * @param string $card_id
      *            卡券ID。创建卡券时use_custom_code填写true时必填。非自定义Code不必填写
-     * @return unknown
+     * @return string
      */
     public function consume($code, $card_id = "")
     {
@@ -562,7 +552,7 @@ class Card
      * 3）导入结束后系统会自动判断提供方设置库存与实际导入code的量是否一致
      * 4）导入失败支持重复导入，提示成功为止
      *
-     * @param unknown $card_id
+     * @param string $card_id
      *            需要进行导入code的卡券ID
      * @param array $codes
      *            需导入微信卡券后台的自定义code，上限为100个
@@ -581,7 +571,25 @@ class Card
     }
 
     /**
-     * 查询导入code数目（导入成功）
+     * 查询导入code数目
+     *
+     * @param
+     *            $card_id
+     * @return string
+     */
+    public function getDepositCount($card_id)
+    {
+        $url = CardConsts::API_CARD_GETE_DEPOSIT_COUNT . "?access_token=" . $this->access_token;
+        $postdata = [
+            'card_id' => $card_id
+        ];
+        $http = new HttpClient();
+        $data = $http->setPostBodyRaw(json_encode($postdata))->post($url);
+        return $data;
+    }
+
+    /**
+     * 核查code接口（导入成功）
      *
      * @param string $card_id
      *            卡券id
@@ -596,7 +604,7 @@ class Card
      *         "not_exist_code":["44444","55555"] // 没有存入的code
      *         }
      */
-    public function getPushCodeCount($card_id, $codes = [])
+    public function checkCode($card_id, $codes = [])
     {
         $url = CardConsts::API_CARD_CHECK_CODE . "?access_token=" . $this->access_token;
         $postdata = [
